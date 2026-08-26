@@ -1,14 +1,9 @@
 {
-  "builds": [
+  "cleanUrls": true,
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
