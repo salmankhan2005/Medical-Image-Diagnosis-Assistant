@@ -1,16 +1,11 @@
-# Ignore node modules and build outputs
-node_modules/
-dist/
-.vercel/
-.git/
-
-# Ignore Python backend and virtual environments
-backend/
-venv/
-.venv/
-ENV/
-
-# Ignore heavy model checkpoints
+node_modules
+dist
+.vercel
+.git
+backend
+venv
+.venv
+ENV
 *.pth
 *.pt
 *.zip

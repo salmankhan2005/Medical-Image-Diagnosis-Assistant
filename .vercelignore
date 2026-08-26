@@ -1,20 +1,11 @@
-# Ignore node modules and build outputs
-node_modules/
-dist/
-.vercel/
-.git/
-
-# Ignore Python backend and virtual environments
-backend/
-medical_image_diagnosis_assistant-web app/backend/
-venv/
-.venv/
-ENV/
-
-# Ignore datasets and heavy model checkpoints
-Diabetic Retinopathy 2015 Data Colored Resized/
-colored_images/
-data/
+node_modules
+dist
+.vercel
+.git
+backend
+venv
+.venv
+ENV
 *.pth
 *.pt
 *.zip
