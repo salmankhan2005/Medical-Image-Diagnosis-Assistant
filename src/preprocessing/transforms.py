@@ -4,7 +4,6 @@ MONAI Medical Preprocessing & Augmentation Pipelines
 import numpy as np
 from monai.transforms import (
     Compose,
-    EnsureChannelFirstd,
     ScaleIntensityRanged,
     NormalizeIntensityd,
     RandRotated,
@@ -17,10 +16,9 @@ from monai.transforms import (
 def get_train_transforms():
     """
     Returns MONAI transform composition for the training partition.
-    Includes domain-safe geometric and intensity augmentations.
+    Includes domain-appropriate geometric and intensity augmentations.
     """
     return Compose([
-        EnsureChannelFirstd(keys=["image"], channel_dim=-1),
         ScaleIntensityRanged(
             keys=["image"],
             a_min=0.0,
@@ -49,7 +47,6 @@ def get_eval_transforms():
     Deterministic normalization only.
     """
     return Compose([
-        EnsureChannelFirstd(keys=["image"], channel_dim=-1),
         ScaleIntensityRanged(
             keys=["image"],
             a_min=0.0,
