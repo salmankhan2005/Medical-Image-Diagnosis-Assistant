@@ -1,40 +1,26 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-# Virtual environments
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Builds
+dist/
+frontend/dist/
+
+# Environments
 .venv/
 venv/
-env/
 ENV/
-.env
 
-# Jupyter & Colab
-.ipynb_checkpoints/
-*/.ipynb_checkpoints/*
-
-# Datasets & Large files
+# Large Datasets & Models
 Diabetic Retinopathy 2015 Data Colored Resized/
 colored_images/
-/data/
-!medical_image_diagnosis_assistant-web app/src/data/
-*.zip
-*.tar.gz
-*.csv
-
-# Model Checkpoints & Artifacts
 *.pth
 *.pt
-artifacts/*.pth
-artifacts/*.pt
-models/*.pth
-models/*.pt
+*.csv
+*.zip
+*.tar.gz
 
-# OS Specific
+# Local / OS
 .DS_Store
-Thumbs.db
-
-.vercel
-.env*
+*.log
+.env.local

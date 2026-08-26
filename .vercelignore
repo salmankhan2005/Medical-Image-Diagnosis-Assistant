@@ -1,17 +1,10 @@
+backend
+.venv
+venv
 node_modules
 dist
-.vercel
-.git
-backend
-venv
-.venv
-ENV
 Diabetic Retinopathy 2015 Data Colored Resized
-colored_images
-data
 *.pth
 *.pt
-*.zip
-*.tar.gz
 *.csv
-*.log
+*.ipynb
