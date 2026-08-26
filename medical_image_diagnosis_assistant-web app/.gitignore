@@ -37,6 +37,7 @@ ENV/
 .env
 .env.*
 *.pth
+!backend/best_densenet121_dr.pth
 *.pt
 *.h5
 *.weights
