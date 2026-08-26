@@ -24,6 +24,8 @@ data/
 *.csv
 
 # Model Checkpoints & Artifacts
+*.pth
+*.pt
 artifacts/*.pth
 artifacts/*.pt
 models/*.pth
