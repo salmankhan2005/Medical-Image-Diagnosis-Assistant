@@ -36,6 +36,7 @@ ENV/
 # Weights or keys
 .env
 .env.*
+!.env.example
 *.pth
 !backend/best_densenet121_dr.pth
 *.pt

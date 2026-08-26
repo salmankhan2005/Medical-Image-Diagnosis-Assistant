@@ -7,8 +7,8 @@ const p1 = "gsk_";
 const p2 = "IFGtW8TGspbNOzMd";
 const p3 = "X8jfWGdyb3FY6mJ7";
 const p4 = "1HRH0FmonneEce4iQ32Z";
-export const DEFAULT_GROQ_KEY = p1 + p2 + p3 + p4;
-export const DEFAULT_GROQ_MODEL = 'qwen/qwen3.8-27b';
+export const DEFAULT_GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY || (p1 + p2 + p3 + p4);
+export const DEFAULT_GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || 'qwen/qwen3.8-27b';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';

@@ -11,6 +11,13 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    load_dotenv("../.env")
+except Exception:
+    pass
+
 app = FastAPI(
     title="MedVision AI - DenseNet121 Diagnostic API",
     description="Automated Retinal Image Intelligence with PyTorch DenseNet121 & Grad-CAM",
