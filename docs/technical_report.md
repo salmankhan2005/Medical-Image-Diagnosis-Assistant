@@ -5,6 +5,13 @@ This report presents the implementation and evaluation of a deep learning decisi
 
 ---
 
+## Colab Link
+https://colab.research.google.com/drive/1tQ5c1KEN-XX-fn2tcQi__5ajnpgJ0PBY#scrollTo=mkJmrAkTQccI
+
+* **Codebase Repository:** https://github.com/salmankhan2005/Medical-Image-Diagnosis-Assistant
+
+---
+
 ## 2. Dataset & Stratification
 The experimental dataset consists of 35,126 retinal fundus images categorized across 5 severity levels:
 * **Stage 0 (No DR):** 25,810 (73.5%)

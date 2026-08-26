@@ -6,6 +6,11 @@ The project evaluates 5 clinical severity levels based on the International Clin
 
 ---
 
+## Colab Link
+https://colab.research.google.com/drive/1tQ5c1KEN-XX-fn2tcQi__5ajnpgJ0PBY#scrollTo=mkJmrAkTQccI
+
+---
+
 ## Clinical Overview & Severity Scale
 * **Class 0 (No DR):** Normal retina with no detectable abnormalities.
 * **Class 1 (Mild DR):** Microaneurysms only.
@@ -79,22 +84,21 @@ medical-image-diagnosis-assistant/
 
 ## Setup and Execution
 
-### Google Colab (Recommended)
-1. Open Google Colab and upload `notebooks/medical_image_diagnosis_assistant.ipynb`.
-2. Navigate to `Runtime` -> `Change runtime type` and select **T4 GPU**.
-3. Execute the notebook cells sequentially (`Runtime` -> `Run all`).
+### Google Colab (Live Notebook)
+* **Direct Colab Link:** [Open in Google Colab](https://colab.research.google.com/drive/1tQ5c1KEN-XX-fn2tcQi__5ajnpgJ0PBY#scrollTo=mkJmrAkTQccI)
+* Hardware recommendation: **T4 GPU** (`Runtime` -> `Change runtime type` -> `T4 GPU`).
 
 ### Local Environment
 ```bash
 # Clone the repository
-git clone https://github.com/username/medical-image-diagnosis-assistant.git
-cd medical-image-diagnosis-assistant
+git clone https://github.com/salmankhan2005/Medical-Image-Diagnosis-Assistant.git
+cd Medical-Image-Diagnosis-Assistant
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Launch Jupyter Lab
-jupyter lab notebooks/medical_image_diagnosis_assistant.ipynb
+# Launch Jupyter Lab / Notebook
+jupyter notebook notebooks/medical_image_diagnosis_assistant.ipynb
 ```
 
 ---
