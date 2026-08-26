@@ -18,7 +18,8 @@ ENV/
 # Datasets & Large files
 Diabetic Retinopathy 2015 Data Colored Resized/
 colored_images/
-data/
+/data/
+!medical_image_diagnosis_assistant-web app/src/data/
 *.zip
 *.tar.gz
 *.csv

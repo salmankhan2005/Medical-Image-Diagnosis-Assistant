@@ -320,7 +320,7 @@ export const DashboardView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4 pt-4 border-t border-brand-border/60 text-center">
-              {MODEL_PERFORMANCE_METRICS.map((m) => (
+              {MODEL_PERFORMANCE_METRICS.map((m: { name: string; value: number }) => (
                 <div key={m.name} className="p-2 rounded-xl bg-brand-subsurface/60">
                   <div className="text-[10px] font-bold text-brand-text-muted uppercase">
                     {m.name}

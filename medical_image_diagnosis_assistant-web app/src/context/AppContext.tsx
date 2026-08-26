@@ -276,7 +276,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const newId = `AN-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const patientId = data.patientId || `PT-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    const matchedSample = SAMPLE_ANALYSES.find((s) => s.imageUrl === data.previewUrl);
+    const matchedSample = SAMPLE_ANALYSES.find((s: AnalysisResult) => s.imageUrl === data.previewUrl);
 
     let result: AnalysisResult;
 
