@@ -1,0 +1,4 @@
+# Ignore Python backend folder for Vercel static frontend deployment
+backend/
+*.pth
+*.pt

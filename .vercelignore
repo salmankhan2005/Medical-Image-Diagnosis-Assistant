@@ -1,0 +1,5 @@
+# Ignore Python backend folder for Vercel static frontend deployment
+backend/
+medical_image_diagnosis_assistant-web app/backend/
+*.pth
+*.pt
