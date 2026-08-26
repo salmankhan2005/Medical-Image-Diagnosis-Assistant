@@ -37,13 +37,14 @@ export async function callGroqChat(
   const temperature = options.temperature ?? 0.3; // low temperature for precise clinical reasoning
   const maxTokens = options.maxTokens ?? 1500;
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const backendUrl = localStorage.getItem('medvision_api_url') || 'http://localhost:8000';
+  const response = await fetch(`${backendUrl}/api/groq/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
+      api_key: apiKey,
       model,
       messages,
       temperature,

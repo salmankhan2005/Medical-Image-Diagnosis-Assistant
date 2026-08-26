@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { ActiveTab, AnalysisResult, NotificationItem } from '../types';
 import { SAMPLE_ANALYSES } from '../data/sampleScans';
 
@@ -45,7 +47,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
-  const [historyList, setHistoryList] = useState<AnalysisResult[]>([]);
   const [currentAnalysis, setCurrentAnalysis] = useState<AnalysisResult | null>(null);
   const [selectedForReport, setSelectedForReport] = useState<AnalysisResult | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
@@ -126,112 +127,104 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification('info', 'Logged Out', 'Your secure session has been terminated.');
   };
 
-  const addAnalysisToHistory = (analysis: AnalysisResult) => {
-    setHistoryList((prev) => [analysis, ...prev]);
+  // --- Convex Real-Time Data Layer ---
+  const convexAnalyses = useQuery(api.analyses.list) ?? [];
+  const createAnalysis = useMutation(api.analyses.create);
+  const removeAnalysis = useMutation(api.analyses.removeByAnalysisId);
+  const reviewAnalysis = useMutation(api.analyses.addReview);
+
+  // Map Convex documents to AnalysisResult format
+  const historyList: AnalysisResult[] = convexAnalyses.map((doc: any) => ({
+    id: doc.analysisId,
+    patientId: doc.patientId,
+    patientAge: doc.patientAge || 52,
+    patientGender: doc.patientGender || 'M',
+    eye: doc.eye,
+    imageName: doc.imageName || 'retinal_scan.png',
+    imageUrl: doc.imageUrl,
+    gradcamUrl: doc.gradcamUrl,
+    overlayUrl: doc.overlayUrl,
+    predictionGrade: doc.predictionGrade,
+    predictionLabel: doc.predictionLabel,
+    confidence: doc.confidence,
+    probabilityDistribution: doc.probabilityDistribution,
+    findings: doc.findings,
+    recommendations: doc.recommendations,
+    inferenceTimeMs: doc.inferenceTimeMs,
+    modelName: doc.modelName,
+    modelVersion: doc.modelVersion,
+    timestamp: doc.timestamp,
+    status: doc.status,
+    reviewedByDoctor: doc.reviewedByDoctor,
+    doctorNotes: doc.doctorNotes || '',
+  }));
+
+  const addAnalysisToHistory = async (analysis: AnalysisResult) => {
     setCurrentAnalysis(analysis);
+    try {
+      await createAnalysis({
+        analysisId: analysis.id,
+        patientId: analysis.patientId,
+        patientAge: analysis.patientAge,
+        patientGender: analysis.patientGender,
+        eye: analysis.eye,
+        imageName: analysis.imageName,
+        imageUrl: analysis.imageUrl,
+        gradcamUrl: analysis.gradcamUrl,
+        overlayUrl: analysis.overlayUrl,
+        predictionGrade: analysis.predictionGrade,
+        predictionLabel: analysis.predictionLabel,
+        confidence: analysis.confidence,
+        probabilityDistribution: analysis.probabilityDistribution,
+        findings: analysis.findings.map((f) => ({
+          id: f.id,
+          name: f.name,
+          detected: f.detected,
+          confidence: f.confidence,
+          location: f.location || '',
+          description: f.description,
+        })),
+        recommendations: analysis.recommendations || [],
+        inferenceTimeMs: analysis.inferenceTimeMs,
+        modelName: analysis.modelName,
+        modelVersion: analysis.modelVersion,
+        timestamp: analysis.timestamp,
+        status: analysis.status,
+        reviewedByDoctor: analysis.reviewedByDoctor || false,
+        doctorNotes: analysis.doctorNotes,
+      });
+    } catch (err) {
+      console.error('Failed to save to Convex:', err);
+    }
   };
 
   const deleteAnalysis = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/history/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        setHistoryList((prev) => prev.filter((item) => item.id !== id));
-        addNotification('info', 'Record Removed', `Analysis record ${id} removed.`);
-      } else {
-        throw new Error('Deletion request failed');
-      }
+      await removeAnalysis({ analysisId: id });
+      addNotification('info', 'Record Removed', `Analysis record ${id} removed from Convex.`);
     } catch (err) {
-      console.error('Database deletion failed, clearing client state:', err);
-      setHistoryList((prev) => prev.filter((item) => item.id !== id));
+      console.error('Convex deletion failed:', err);
     }
   };
 
   const updateAnalysisReview = async (id: string, reviewed: boolean, notes: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/history/${id}/review`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          reviewedByDoctor: reviewed,
-          doctorNotes: notes,
-        }),
+      await reviewAnalysis({
+        analysisId: id,
+        reviewedByDoctor: reviewed,
+        doctorNotes: notes,
       });
-      if (response.ok) {
-        const updated = await response.json();
-        setHistoryList((prev) =>
-          prev.map((item) =>
-            item.id === id ? { ...item, reviewedByDoctor: reviewed, doctorNotes: notes } : item
-          )
-        );
-        if (currentAnalysis && currentAnalysis.id === id) {
-          setCurrentAnalysis((prev) =>
-            prev ? { ...prev, reviewedByDoctor: reviewed, doctorNotes: notes } : null
-          );
-        }
-      }
-    } catch (err) {
-      console.error('Database review update failed, clearing client state:', err);
-      setHistoryList((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, reviewedByDoctor: reviewed, doctorNotes: notes } : item
-        )
-      );
       if (currentAnalysis && currentAnalysis.id === id) {
         setCurrentAnalysis((prev) =>
           prev ? { ...prev, reviewedByDoctor: reviewed, doctorNotes: notes } : null
         );
       }
+    } catch (err) {
+      console.error('Convex review update failed:', err);
     }
   };
 
-  React.useEffect(() => {
-    if (backendOnline) {
-      const fetchHistory = async () => {
-        try {
-          const response = await fetch('http://localhost:8000/api/history');
-          if (response.ok) {
-            const data = await response.json();
-            const parsed = data.map((item: any) => ({
-              id: item.id,
-              patientId: item.patientId,
-              patientAge: item.patientAge || 52,
-              patientGender: item.patientGender || 'M',
-              eye: item.eye,
-              imageName: item.imageName || 'retinal_scan.png',
-              imageUrl: item.imageUrl,
-              gradcamUrl: item.gradcamUrl,
-              overlayUrl: item.overlayUrl,
-              predictionGrade: item.predictionGrade,
-              predictionLabel: item.predictionLabel,
-              confidence: item.confidence,
-              probabilityDistribution: item.probabilityDistribution,
-              findings: item.findings,
-              recommendations: item.recommendations,
-              inferenceTimeMs: item.inferenceTimeMs,
-              modelName: item.modelName,
-              modelVersion: item.modelVersion,
-              timestamp: item.timestamp,
-              status: item.status,
-              reviewedByDoctor: item.reviewedByDoctor,
-              doctorNotes: item.doctorNotes || '',
-            }));
-            setHistoryList(parsed);
-            if (parsed.length > 0) {
-              setCurrentAnalysis(parsed[0]);
-            }
-          }
-        } catch (err) {
-          console.error('Failed to load history from CockroachDB:', err);
-        }
-      };
-      fetchHistory();
-    }
-  }, [backendOnline]);
-
+  // Health check for PyTorch backend (unchanged)
   React.useEffect(() => {
     const checkHealth = async () => {
       try {
@@ -256,27 +249,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           setBackendOnline(false);
           setModelLoaded(false);
           setGroqConfigured(hasKey);
-          console.log(
-            `%c🏥 MedVision System Diagnostic Check:\n` +
-            `  • PyTorch Server : 🔴 OFFLINE\n` +
-            `  • DenseNet Weights: 🔴 UNKNOWN\n` +
-            `  • Groq LLM API   : ${hasKey ? '🟢 CONFIGURED' : '🔴 UNCONFIGURED'}`,
-            "color: #EF4444; font-weight: bold; line-height: 1.5;"
-          );
         }
       } catch (err) {
         setBackendOnline(false);
         setModelLoaded(false);
         const clientKey = localStorage.getItem('medvision_groq_key');
-        const hasKey = !!clientKey;
-        setGroqConfigured(hasKey);
-        console.log(
-          `%c🏥 MedVision System Diagnostic Check:\n` +
-          `  • PyTorch Server : 🔴 OFFLINE\n` +
-          `  • DenseNet Weights: 🔴 UNKNOWN\n` +
-          `  • Groq LLM API   : ${hasKey ? '🟢 CONFIGURED' : '🔴 UNCONFIGURED'}`,
-          "color: #EF4444; font-weight: bold; line-height: 1.5;"
-        );
+        setGroqConfigured(!!clientKey);
       }
     };
 
@@ -294,11 +272,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     age?: number;
     gender?: 'M' | 'F' | 'Other';
   }): Promise<AnalysisResult> => {
-    // Generate unique ID
     const newId = `AN-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const patientId = data.patientId || `PT-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    // If an existing sample scan URL matches, use calibrated output
     const matchedSample = SAMPLE_ANALYSES.find((s) => s.imageUrl === data.previewUrl);
 
     let result: AnalysisResult;
@@ -360,11 +336,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
       };
     } else {
-      // Custom image inference engine simulation with high-grade Grad-CAM synthesis
       const simulatedGrade = (Math.floor(Math.random() * 4) + 1) as 0 | 1 | 2 | 3 | 4;
       const confidence = Number((0.85 + Math.random() * 0.12).toFixed(3));
 
-      // Generate probability distribution where simulatedGrade has the highest confidence
       const distribution = [0, 1, 2, 3, 4].map((g) => {
         if (g === simulatedGrade) {
           return { grade: g as 0 | 1 | 2 | 3 | 4, name: ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative'][g], probability: confidence, color: ['#10B981', '#0EA5A9', '#7C3AED', '#F59E0B', '#EF4444'][g] };
@@ -381,7 +355,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         eye: data.eye,
         imageName: data.file?.name || 'custom_retinal_scan.png',
         imageUrl: data.previewUrl,
-        gradcamUrl: data.previewUrl, // will be layered or blended in viewer
+        gradcamUrl: data.previewUrl,
         overlayUrl: data.previewUrl,
         predictionGrade: simulatedGrade,
         predictionLabel: ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR'][simulatedGrade],

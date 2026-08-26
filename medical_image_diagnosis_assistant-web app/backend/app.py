@@ -11,13 +11,9 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, Boolean, JSON
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
 app = FastAPI(
     title="MedVision AI - DenseNet121 Diagnostic API",
-    description="Automated Retinal Image Intelligence with PyTorch DenseNet121, Grad-CAM, and CockroachDB",
+    description="Automated Retinal Image Intelligence with PyTorch DenseNet121 & Grad-CAM",
     version="1.0.0"
 )
 
@@ -42,56 +38,6 @@ p2 = "IFGtW8TGspbNOzMd"
 p3 = "X8jfWGdyb3FY6mJ7"
 p4 = "1HRH0FmonneEce4iQ32Z"
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", p1 + p2 + p3 + p4)
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://root@localhost:26257/medvision?sslmode=disable")
-
-# --- SQLAlchemy Database Models for CockroachDB ---
-Base = declarative_base()
-
-class AnalysisModel(Base):
-    __tablename__ = 'analyses'
-    
-    id = Column(String, primary_key=True)
-    patientId = Column(String)
-    patientAge = Column(Integer, nullable=True)
-    patientGender = Column(String, nullable=True)
-    eye = Column(String)
-    imageName = Column(String)
-    imageUrl = Column(String)
-    gradcamUrl = Column(String)
-    overlayUrl = Column(String)
-    predictionGrade = Column(Integer)
-    predictionLabel = Column(String)
-    confidence = Column(Float)
-    probabilityDistribution = Column(JSON)
-    findings = Column(JSON)
-    recommendations = Column(JSON)
-    inferenceTimeMs = Column(Integer)
-    modelName = Column(String)
-    modelVersion = Column(String)
-    timestamp = Column(String)
-    status = Column(String)
-    reviewedByDoctor = Column(Boolean, default=False)
-    doctorNotes = Column(String, nullable=True)
-
-SessionLocal = None
-db_connected = False
-in_memory_db = [] # Fallback database
-
-def init_db():
-    global SessionLocal, db_connected
-    try:
-        url = DATABASE_URL
-        if url.startswith("cockroachdb://"):
-            url = url.replace("cockroachdb://", "postgresql://")
-        print(f"Connecting to CockroachDB at: {url}")
-        engine = create_engine(url, pool_pre_ping=True)
-        Base.metadata.create_all(bind=engine)
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        db_connected = True
-        print("Successfully connected and initialized CockroachDB tables!")
-    except Exception as e:
-        print(f"CockroachDB connection warning: {e}")
-        print("Falling back to local in-memory database persistence.")
 
 # Lazy-loaded PyTorch model & Grad-CAM
 model = None
@@ -134,7 +80,6 @@ def load_densenet():
 
 @app.on_event("startup")
 async def startup_event():
-    init_db()
     load_densenet()
 
 @app.get("/health")
@@ -147,7 +92,7 @@ async def health_check():
         "weights_path": MODEL_PATH,
         "weights_present": os.path.exists(MODEL_PATH),
         "groq_configured": bool(GROQ_API_KEY),
-        "db_connected": db_connected,
+        "database": "Convex (cloud-hosted)",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     }
 
@@ -156,14 +101,16 @@ class GroqChatRequest(BaseModel):
     model: Optional[str] = "qwen/qwen3.8-27b"
     temperature: Optional[float] = 0.3
     max_tokens: Optional[int] = 1500
+    api_key: Optional[str] = None
 
 @app.post("/api/groq/chat")
 async def groq_chat_proxy(req: GroqChatRequest):
     """Direct proxy to Groq LLM API"""
-    if not GROQ_API_KEY:
+    active_key = req.api_key or GROQ_API_KEY
+    if not active_key:
         raise HTTPException(
             status_code=400,
-            detail="Groq API Key is not configured on the backend server. Please set the GROQ_API_KEY environment variable."
+            detail="Groq API Key is not configured."
         )
     import urllib.request
     import json
@@ -171,7 +118,7 @@ async def groq_chat_proxy(req: GroqChatRequest):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Authorization": f"Bearer {active_key}",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     payload = {
@@ -195,71 +142,6 @@ def to_base64_data_url(pil_img, img_format="JPEG"):
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     return f"data:image/{img_format.lower()};base64,{img_str}"
 
-@app.get("/api/history")
-async def get_history():
-    """Fetches all past diagnostic analyses"""
-    if db_connected:
-        try:
-            session = SessionLocal()
-            analyses = session.query(AnalysisModel).order_by(AnalysisModel.timestamp.desc()).all()
-            session.close()
-            return [a.__dict__ for a in analyses]
-        except Exception as e:
-            print(f"Error fetching from CockroachDB: {e}")
-            return in_memory_db
-    return in_memory_db
-
-@app.delete("/api/history/{id}")
-async def delete_history(id: str):
-    """Deletes an analysis record"""
-    global in_memory_db
-    if db_connected:
-        try:
-            session = SessionLocal()
-            record = session.query(AnalysisModel).filter(AnalysisModel.id == id).first()
-            if record:
-                session.delete(record)
-                session.commit()
-            session.close()
-            return {"status": "deleted", "id": id}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Database deletion failed: {e}")
-    else:
-        in_memory_db = [item for item in in_memory_db if item["id"] != id]
-        return {"status": "deleted", "id": id}
-
-class DoctorReviewRequest(BaseModel):
-    doctorNotes: str
-    reviewedByDoctor: bool
-
-@app.post("/api/history/{id}/review")
-async def review_history(id: str, req: DoctorReviewRequest):
-    """Saves doctor sign-off and clinical notes"""
-    global in_memory_db
-    if db_connected:
-        try:
-            session = SessionLocal()
-            record = session.query(AnalysisModel).filter(AnalysisModel.id == id).first()
-            if record:
-                record.doctorNotes = req.doctorNotes
-                record.reviewedByDoctor = req.reviewedByDoctor
-                session.commit()
-                res = record.__dict__.copy()
-            else:
-                session.close()
-                raise HTTPException(status_code=404, detail="Record not found")
-            session.close()
-            return res
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Database update failed: {e}")
-    else:
-        for item in in_memory_db:
-            if item["id"] == id:
-                item["doctorNotes"] = req.doctorNotes
-                item["reviewedByDoctor"] = req.reviewedByDoctor
-                return item
-        raise HTTPException(status_code=404, detail="Record not found")
-
 @app.post("/api/diagnose")
 async def diagnose_retinal_image(
     file: UploadFile = File(...),
@@ -267,7 +149,8 @@ async def diagnose_retinal_image(
     eye: Optional[str] = Form("OD")
 ):
     """
-    Performs 5-class Diabetic Retinopathy classification and Grad-CAM generation
+    Performs 5-class Diabetic Retinopathy classification and Grad-CAM generation.
+    Results are returned to the frontend which saves them to Convex DB.
     """
     start_time = time.time()
     contents = await file.read()
@@ -433,39 +316,6 @@ async def diagnose_retinal_image(
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "status": "Completed"
     }
-
-    # Save to Database
-    if db_connected:
-        try:
-            session = SessionLocal()
-            analysis_row = AnalysisModel(
-                id=result_dict["id"],
-                patientId=result_dict["patientId"],
-                eye=result_dict["eye"],
-                predictionGrade=result_dict["predictionGrade"],
-                predictionLabel=result_dict["predictionLabel"],
-                confidence=result_dict["confidence"],
-                probabilityDistribution=result_dict["probabilityDistribution"],
-                findings=result_dict["findings"],
-                recommendations=result_dict["recommendations"],
-                imageUrl=result_dict["imageUrl"],
-                gradcamUrl=result_dict["gradcamUrl"],
-                overlayUrl=result_dict["overlayUrl"],
-                inferenceTimeMs=result_dict["inferenceTimeMs"],
-                modelName=result_dict["modelName"],
-                modelVersion=result_dict["modelVersion"],
-                timestamp=result_dict["timestamp"],
-                status=result_dict["status"],
-                reviewedByDoctor=False
-            )
-            session.add(analysis_row)
-            session.commit()
-            session.close()
-        except Exception as e:
-            print(f"Error saving to CockroachDB: {e}")
-            in_memory_db.insert(0, result_dict)
-    else:
-        in_memory_db.insert(0, result_dict)
 
     return result_dict
 
