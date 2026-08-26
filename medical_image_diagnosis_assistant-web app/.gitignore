@@ -43,3 +43,5 @@ ENV/
 *.h5
 *.weights
 *.bin
+
+.vercel

@@ -6,6 +6,9 @@ backend
 venv
 .venv
 ENV
+Diabetic Retinopathy 2015 Data Colored Resized
+colored_images
+data
 *.pth
 *.pt
 *.zip
