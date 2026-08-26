@@ -1,5 +1,23 @@
-# Ignore Python backend folder for Vercel static frontend deployment
+# Ignore node modules and build outputs
+node_modules/
+dist/
+.vercel/
+.git/
+
+# Ignore Python backend and virtual environments
 backend/
 medical_image_diagnosis_assistant-web app/backend/
+venv/
+.venv/
+ENV/
+
+# Ignore datasets and heavy model checkpoints
+Diabetic Retinopathy 2015 Data Colored Resized/
+colored_images/
+data/
 *.pth
 *.pt
+*.zip
+*.tar.gz
+*.csv
+*.log
