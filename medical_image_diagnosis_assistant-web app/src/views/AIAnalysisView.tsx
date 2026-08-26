@@ -32,6 +32,7 @@ export const AIAnalysisView: React.FC = () => {
     setActiveTab,
     addNotification,
     updateAnalysisReview,
+    user,
   } = useApp();
 
   const [doctorNotes, setDoctorNotes] = useState(currentAnalysis?.doctorNotes || '');
@@ -73,7 +74,7 @@ export const AIAnalysisView: React.FC = () => {
     addNotification(
       'success',
       'Clinical Sign-off Recorded',
-      `Analysis ${currentAnalysis.id} for ${currentAnalysis.patientId} reviewed and signed by Dr. Alex Morgan.`
+      `Analysis ${currentAnalysis.id} for ${currentAnalysis.patientId} reviewed and signed by ${user?.name || 'Dr. Alex Morgan'}.`
     );
   };
 
@@ -262,7 +263,7 @@ export const AIAnalysisView: React.FC = () => {
                 <div className="flex items-center gap-2">
                   {isReviewed ? (
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Reviewed by Dr. Alex Morgan
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Reviewed by {user?.name || 'Dr. Alex Morgan'}
                     </span>
                   ) : (
                     <span className="text-xs text-brand-text-muted flex items-center gap-1">

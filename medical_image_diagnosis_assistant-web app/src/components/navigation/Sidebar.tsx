@@ -17,7 +17,16 @@ import { useApp } from '../../context/AppContext';
 import { ActiveTab } from '../../types';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, isSidebarCollapsed, setIsSidebarCollapsed, backendOnline } = useApp();
+  const { activeTab, setActiveTab, isSidebarCollapsed, setIsSidebarCollapsed, backendOnline, user } = useApp();
+
+  const getInitials = (name: string) => {
+    const clean = name.replace(/^(dr|dr\.)\s+/i, '');
+    const parts = clean.split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return clean.substring(0, 2).toUpperCase();
+  };
 
   const navItems: { id: ActiveTab; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -197,14 +206,14 @@ export const Sidebar: React.FC = () => {
         {!isSidebarCollapsed ? (
           <div className="p-2.5 rounded-xl bg-white border border-brand-border flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-indigo to-teal-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
-              DR
+              {getInitials(user?.name || 'Dr. Alex Morgan')}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-brand-text truncate">
-                Dr. Alex Morgan
+                {user?.name || 'Dr. Alex Morgan'}
               </div>
               <div className="text-[11px] text-brand-text-muted truncate">
-                Ophthalmology Lead
+                {user?.role || 'Ophthalmology Lead'}
               </div>
             </div>
           </div>
@@ -212,9 +221,9 @@ export const Sidebar: React.FC = () => {
           <div className="flex justify-center py-1">
             <div
               className="w-8 h-8 rounded-full bg-brand-indigo text-white text-xs font-bold flex items-center justify-center"
-              title="Dr. Alex Morgan"
+              title={user?.name || 'Dr. Alex Morgan'}
             >
-              DR
+              {getInitials(user?.name || 'Dr. Alex Morgan')}
             </div>
           </div>
         )}

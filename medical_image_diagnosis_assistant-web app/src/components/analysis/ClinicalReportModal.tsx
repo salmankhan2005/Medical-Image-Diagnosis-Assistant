@@ -14,6 +14,7 @@ import {
 import { AnalysisResult } from '../../types';
 import { DR_CLASSES } from '../../data/sampleScans';
 import { SeverityBadge } from '../common/SeverityBadge';
+import { useApp } from '../../context/AppContext';
 
 interface ClinicalReportModalProps {
   analysis: AnalysisResult | null;
@@ -26,6 +27,7 @@ export const ClinicalReportModal: React.FC<ClinicalReportModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { user } = useApp();
   if (!isOpen || !analysis) return null;
 
   const classInfo = DR_CLASSES[analysis.predictionGrade];
@@ -248,10 +250,10 @@ export const ClinicalReportModal: React.FC<ClinicalReportModalProps> = ({
                   Attending Ophthalmologist / AI Reviewer:
                 </span>
                 <span className="font-bold text-sm text-brand-text block mt-0.5">
-                  Dr. Alex Morgan, MD, PhD
+                  {user?.name || 'Dr. Alex Morgan'}, MD, PhD
                 </span>
                 <span className="text-brand-text-muted text-[11px]">
-                  Retinal Specialist • License #MD-90214
+                  {user?.role || 'Retinal Specialist'} • License #MD-90214
                 </span>
               </div>
               <div className="w-48 border-b-2 border-dashed border-brand-border text-center pb-1 text-[11px] text-brand-text-muted">
