@@ -228,7 +228,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   React.useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch("http://localhost:8000/health");
+        const backendUrl = localStorage.getItem('medvision_api_url') || import.meta.env.VITE_FASTAPI_URL || 'https://medical-image-diagnosis-assistant.onrender.com';
+        const response = await fetch(`${backendUrl}/health`);
         const clientKey = localStorage.getItem('medvision_groq_key');
         const hasKey = !!clientKey;
         if (response.ok) {
@@ -286,7 +287,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         formData.append("patient_id", patientId);
         formData.append("eye", data.eye);
 
-        const response = await fetch("http://localhost:8000/api/diagnose", {
+        const backendUrl = localStorage.getItem('medvision_api_url') || import.meta.env.VITE_FASTAPI_URL || 'https://medical-image-diagnosis-assistant.onrender.com';
+        const response = await fetch(`${backendUrl}/api/diagnose`, {
           method: "POST",
           body: formData,
         });

@@ -19,7 +19,9 @@ import { MODEL_SPECIFICATIONS } from '../data/modelMetrics';
 export const SettingsView: React.FC = () => {
   const { backendOnline, setBackendOnline, addNotification, setGroqConfigured } = useApp();
 
-  const [apiUrl, setApiUrl] = useState<string>('http://localhost:8000');
+  const [apiUrl, setApiUrl] = useState<string>(
+    localStorage.getItem('medvision_api_url') || import.meta.env.VITE_FASTAPI_URL || 'https://medical-image-diagnosis-assistant.onrender.com'
+  );
   const [modelWeightPath, setModelWeightPath] = useState<string>(
     'E:\\ml-asses\\medical_image_diagnosis_assistant-web app\\best_densenet121_dr.pth'
   );

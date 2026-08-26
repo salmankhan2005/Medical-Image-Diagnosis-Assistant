@@ -37,7 +37,7 @@ export async function callGroqChat(
   const temperature = options.temperature ?? 0.3; // low temperature for precise clinical reasoning
   const maxTokens = options.maxTokens ?? 1500;
 
-  const backendUrl = localStorage.getItem('medvision_api_url') || 'http://localhost:8000';
+  const backendUrl = localStorage.getItem('medvision_api_url') || import.meta.env.VITE_FASTAPI_URL || 'https://medical-image-diagnosis-assistant.onrender.com';
   const response = await fetch(`${backendUrl}/api/groq/chat`, {
     method: 'POST',
     headers: {
