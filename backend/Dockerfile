@@ -14,12 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application file
+# Copy application and model weights
 COPY app.py .
-
-# Copy model weights (now tracked in git via !backend/best_densenet121_dr.pth in .gitignore)
-# If not present in build context, the app will attempt MODEL_URL download at startup
-COPY best_densenet121_dr.pth . 2>/dev/null || echo "Model .pth not in build context - startup download required"
+COPY best_densenet121_dr.pth .
 
 EXPOSE 8000
 
