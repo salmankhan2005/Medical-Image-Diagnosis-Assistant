@@ -28,7 +28,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -36,9 +36,10 @@ app.add_middleware(
 # Robust model path checking
 MODEL_PATH = os.environ.get("MODEL_PATH", "best_densenet121_dr.pth")
 if not os.path.exists(MODEL_PATH):
-    MODEL_PATH = "../best_densenet121_dr.pth"
+    MODEL_PATH = "backend/best_densenet121_dr.pth"
 if not os.path.exists(MODEL_PATH):
-    MODEL_PATH = "E:/ml-asses/medical_image_diagnosis_assistant-web app/best_densenet121_dr.pth"
+    MODEL_PATH = "../best_densenet121_dr.pth"
+
 
 p1 = "gsk_"
 p2 = "IFGtW8TGspbNOzMd"

@@ -1,4 +1,5 @@
 import React from 'react';
+import eyeScanIllustration from '../assets/eye_scan_illustration.jpg';
 import {
   UploadCloud,
   History,
@@ -115,7 +116,7 @@ export const DashboardView: React.FC = () => {
           {/* Right AI Abstract Visual Widget */}
           <div className="hidden lg:flex items-center gap-4 bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-brand-border shadow-bento">
             <img 
-              src="/src/assets/eye_scan_illustration.jpg" 
+              src={eyeScanIllustration} 
               alt="AI Retinal Diagnostic Mapping" 
               className="w-28 h-28 rounded-2xl object-cover border border-brand-border shadow-sm hover:scale-105 transition-transform duration-300"
             />
