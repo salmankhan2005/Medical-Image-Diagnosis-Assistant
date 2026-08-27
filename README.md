@@ -4,12 +4,17 @@ An end-to-end deep learning pipeline for multi-class classification and visual d
 
 The project evaluates 5 clinical severity levels based on the International Clinical Diabetic Retinopathy Disease Severity Scale using **DenseNet-121**, **MONAI** medical image preprocessing transforms, class-weighted loss optimization, and **Grad-CAM** activation mapping.
 
+## 🌐 Live Deployments & Demos
+
+| Platform | Service | Status & URL |
+| :--- | :--- | :--- |
+| **Frontend Web App** | Vercel (React + Vite + Tailwind) | [https://assistant-sigma-wine.vercel.app](https://assistant-sigma-wine.vercel.app) |
+| **Backend API** | Render (FastAPI + PyTorch + DenseNet121) | [https://medical-image-diagnosis-assistant.onrender.com](https://medical-image-diagnosis-assistant.onrender.com) |
+| **Health Endpoint** | PyTorch Diagnostics | [https://medical-image-diagnosis-assistant.onrender.com/health](https://medical-image-diagnosis-assistant.onrender.com/health) |
+| **Training Notebook** | Google Colab | [Open in Google Colab](https://colab.research.google.com/drive/1tQ5c1KEN-XX-fn2tcQi__5ajnpgJ0PBY#scrollTo=mkJmrAkTQccI) |
+
 ---
 
-## Colab Link
-https://colab.research.google.com/drive/1tQ5c1KEN-XX-fn2tcQi__5ajnpgJ0PBY#scrollTo=mkJmrAkTQccI
-
----
 
 ## Clinical Overview & Severity Scale
 * **Class 0 (No DR):** Normal retina with no detectable abnormalities.
