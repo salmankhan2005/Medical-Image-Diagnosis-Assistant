@@ -49,6 +49,25 @@ if not os.path.exists(MODEL_PATH):
     MODEL_PATH = "backend/best_densenet121_dr.pth"
 if not os.path.exists(MODEL_PATH):
     MODEL_PATH = "../best_densenet121_dr.pth"
+MODEL_URL = os.environ.get("MODEL_URL", "")  # Optional: public URL to download model weights
+
+def maybe_download_model():
+    """Download model weights from MODEL_URL if the file is missing."""
+    global MODEL_PATH
+    if os.path.exists(MODEL_PATH):
+        return  # Already present, nothing to do
+    if not MODEL_URL:
+        print("No MODEL_URL set and model file not found — running in simulation mode.")
+        return
+    import urllib.request
+    dest = "best_densenet121_dr.pth"
+    print(f"Downloading model weights from MODEL_URL...")
+    try:
+        urllib.request.urlretrieve(MODEL_URL, dest)
+        MODEL_PATH = dest
+        print("Model weights downloaded successfully.")
+    except Exception as e:
+        print(f"Model download failed: {e} — running in simulation mode.")
 
 
 p1 = "gsk_"
@@ -98,6 +117,8 @@ def load_densenet():
 
 @app.on_event("startup")
 async def startup_event():
+    maybe_download_model()
+
     load_densenet()
 
 @app.get("/health")

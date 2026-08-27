@@ -15,11 +15,12 @@ frontend/dist/
 venv/
 ENV/
 
-# Large Datasets & Models
+# Large Datasets & Models (exclude .pth everywhere EXCEPT backend model)
 Diabetic Retinopathy 2015 Data Colored Resized/
 colored_images/
 *.pth
 *.pt
+!backend/best_densenet121_dr.pth
 *.csv
 *.zip
 *.tar.gz
