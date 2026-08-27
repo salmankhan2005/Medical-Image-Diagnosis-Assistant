@@ -28,6 +28,7 @@ app = FastAPI(
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://assistant-sigma-wine.vercel.app",
     "https://diagnosis-assistant.vercel.app",
     "https://medical-image-diagnosis-assistant-nu.vercel.app",
     "https://medical-image-diagnosis-assistant.vercel.app",
