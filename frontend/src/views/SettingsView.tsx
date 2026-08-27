@@ -220,11 +220,11 @@ export const SettingsView: React.FC = () => {
                   onChange={(e) => setGroqModel(e.target.value)}
                   className="w-full px-3 py-2 bg-brand-subsurface border border-brand-border rounded-xl font-bold text-xs text-brand-text focus:outline-none focus:border-brand-indigo focus:bg-white"
                 >
-                  <option value="llama-3.3-70b-versatile">LLaMA 3.3 70B Versatile (Recommended)</option>
-                  <option value="llama-3.1-70b-versatile">LLaMA 3.1 70B Versatile</option>
-                  <option value="llama-3.1-8b-instant">LLaMA 3.1 8B Instant (Ultra-fast)</option>
-                  <option value="mixtral-8x7b-32768">Mixtral 8x7B (32k context)</option>
-                  <option value="gemma2-9b-it">Gemma 2 9B IT</option>
+                  <option value="qwen/qwen3.8-27b">Qwen 3.8 27B (Recommended • Fast Clinical Reasoning)</option>
+                  <option value="qwen/qwen3.6-27b">Qwen 3.6 27B</option>
+                  <option value="openai/gpt-oss-120b">GPT-OSS 120B (High Reasoning)</option>
+                  <option value="openai/gpt-oss-20b">GPT-OSS 20B (Instant)</option>
+                  <option value="groq/compound">Groq Compound</option>
                 </select>
               </div>
             </div>
