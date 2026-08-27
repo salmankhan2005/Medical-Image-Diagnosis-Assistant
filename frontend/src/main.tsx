@@ -4,7 +4,9 @@ import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import App from './App';
 import './index.css';
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+// Fallback to production Convex cloud URL if VITE_CONVEX_URL env var is missing during Vercel build
+const convexUrl = import.meta.env.VITE_CONVEX_URL || 'https://elated-mastiff-563.convex.cloud';
+const convex = new ConvexReactClient(convexUrl);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
