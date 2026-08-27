@@ -24,14 +24,24 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for Vite frontend
+# Enable CORS for Vite frontend on Vercel & local dev
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://diagnosis-assistant.vercel.app",
+    "https://medical-image-diagnosis-assistant-nu.vercel.app",
+    "https://medical-image-diagnosis-assistant.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
 
 # Robust model path checking
 MODEL_PATH = os.environ.get("MODEL_PATH", "best_densenet121_dr.pth")
