@@ -28,3 +28,5 @@ colored_images/
 # Local / OS
 .DS_Store
 *.log
+docs/0*.md
+scratch/
